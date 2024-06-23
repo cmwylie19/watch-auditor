@@ -16,4 +16,18 @@ Deploys a short lived Pod in NeuVector namespace which receives an Envoy sidecar
 
 
 
-**Bonus:** Produces prom metics based on audits/kills
+## Developing
+
+import dev image into k3d
+
+```bash
+k3d cluster delete --all;
+docker system prune -a -f 
+k3d cluster create;
+docker build -t watch-auditor:dev .;
+k3d image import watch-auditor:dev -c k3s-default  
+k apply -f k8s
+```
+
+docker exec -it k3d-k3s-default-server-0 crictl images
+```

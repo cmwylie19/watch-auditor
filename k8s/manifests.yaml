@@ -25,9 +25,10 @@ spec:
     spec:
       serviceAccountName: watch-auditor
       containers:
-      - image: cmwylie19/watch-auditor:latest
+      - image: watch-auditor:dev
         name: watch-auditor
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
+        args: ["serve"]
         ports:
         - containerPort: 8080
         resources: {}
