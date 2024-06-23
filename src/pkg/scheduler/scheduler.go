@@ -3,6 +3,7 @@ package scheduler
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/cmwylie19/watch-auditor/src/config/lang"
 	"github.com/cmwylie19/watch-auditor/src/pkg/logging"
@@ -58,15 +59,29 @@ func NewScheduler(failureThreshold, every int, unit string) *Scheduler {
 	}
 }
 func (s *Scheduler) Start() {
-	for {
-		s.CreatePod()
-		s.CheckPod()
-		s.DeletePod()
-		if s.failureCount >= s.failureThreshold {
-			s.DeleteWatcherPod("pepr-system")
-			s.failureCount = 0
-		}
+	if s.Unit == "minutes" {
+		s.Every = s.Every * 60
 	}
+	ticker := time.NewTicker(time.Duration(s.Every) * time.Second)
+
+	for range ticker.C {
+		go func() {
+			s.CreatePod()
+
+			time.AfterFunc(10*time.Second, func() {
+				s.CheckPod()
+
+				time.AfterFunc(5*time.Second, func() {
+					s.DeletePod()
+					if s.failureCount >= s.failureThreshold-1 {
+						s.DeleteWatcherPod("pepr-system")
+						s.failureCount = 0
+					}
+				})
+			})
+		}()
+	}
+
 }
 func (s *Scheduler) CreatePod() {
 	pod := &v1.Pod{
