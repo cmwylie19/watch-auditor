@@ -56,10 +56,11 @@ func init() {
 			}
 
 			server := server.Server{
-				Port:  port,
-				Every: every,
-				Unit:  unit,
-				Mode:  mode,
+				Port:             port,
+				Every:            every,
+				Unit:             unit,
+				Mode:             mode,
+				FailureThreshold: failureThreshold,
 			}
 
 			if err := server.Start(); err != nil {
