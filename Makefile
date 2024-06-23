@@ -1,5 +1,3 @@
-# Makefile for building the Admission Controller server + docker image.
-
 .DEFAULT_GOAL := docker-image
 
 IMAGE ?= cmwylie19/watch-auditor:latest
@@ -9,9 +7,5 @@ compile:
 	mv watch-auditor image/watch-auditor
 
 
-build-image: 
-	docker build -t $(IMAGE) image/
-
-
-push-image:
-	docker push $(IMAGE)
+build-push-image: 
+	docker buildx build --push --platform linux/amd64 -t $(IMAGE) image/
