@@ -57,7 +57,17 @@ func NewScheduler(failureThreshold, every int, unit string) *Scheduler {
 		failureCount:         0,
 	}
 }
-
+func (s *Scheduler) Start() {
+	for {
+		s.CreatePod()
+		s.CheckPod()
+		s.DeletePod()
+		if s.failureCount >= s.failureThreshold {
+			s.DeleteWatcherPod("pepr-system")
+			s.failureCount = 0
+		}
+	}
+}
 func (s *Scheduler) CreatePod() {
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{

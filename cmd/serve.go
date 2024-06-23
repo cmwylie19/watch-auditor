@@ -67,6 +67,7 @@ func init() {
 				logging.Error(err.Error())
 				os.Exit(1)
 			}
+
 		},
 	}
 	serveCmd.PersistentFlags().IntVarP(&port, "port", "p", 8080, "Port to listen on (default: 8080)")
