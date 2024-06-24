@@ -169,11 +169,7 @@ watch_controller_failures_total 10 # IMPORTANT!!!
 ## Developing
 
 
-```bash
-There are 10 types of people in this world, those who understand binary and those who don't ¯\_(ツ)_/¯.
-```
-
-Reallll quick restart/reset of simulated environment:
+Reallll quick restart/reset of simulated environment (for Mac, use the Makefile for a linux build):
 
 ```bash
 k3d cluster delete --all;
@@ -234,3 +230,8 @@ k exec -it -n watch-auditor curler -- curl watch-auditor:8080/metrics
 
 
 
+Closing remarks:
+
+```plaintext
+There are 10 types of people in this world, those who understand binary and those who don't ¯\_(ツ)_/¯.
+```
