@@ -53,6 +53,7 @@ spec:
       creationTimestamp: null
       labels:
         app: pepr-deploy
+        pepr.dev/controller: watcher
     spec:
       containers:
       - image: nginx

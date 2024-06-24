@@ -2,7 +2,6 @@ package scheduler
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/cmwylie19/watch-auditor/src/config/lang"
@@ -147,19 +146,22 @@ func (s *Scheduler) CheckPod() {
 func (s *Scheduler) DeletePod() {
 	err := s.client.CoreV1().Pods("neuvector").Delete(context.TODO(), "auto-kill-pod", metav1.DeleteOptions{})
 	if err != nil {
-		logging.Info(fmt.Sprintf(lang.SchedulerFailedDelete, err))
+		logging.Info(lang.SchedulerAuditorFailedDeletion)
 		return
+	} else {
+		logging.Info(lang.SchedulerAuditorSuccessDeletion)
 	}
 }
 
 func (s *Scheduler) DeleteWatcherPod(namespace string) {
 	labelSelector := "pepr.dev/controller=watcher"
-	deleteOptions := metav1.DeleteOptions{}
-	listOptions := metav1.ListOptions{LabelSelector: labelSelector}
-	if err := s.client.CoreV1().Pods(namespace).DeleteCollection(context.TODO(), deleteOptions, listOptions); err != nil {
-		logging.Error(fmt.Sprintf(lang.SchedulerWatcherPodFailedDeletion+namespace, err.Error()))
+
+	if err := s.client.CoreV1().Pods(namespace).DeleteCollection(context.TODO(), metav1.DeleteOptions{}, metav1.ListOptions{
+		LabelSelector: labelSelector,
+	}); err != nil {
+		logging.Info(lang.SchedulerWatcherPodFailedDeletion)
 	} else {
-		logging.Info(lang.SchedulerWatcherPodSuccessDeletion + namespace)
+		logging.Info(lang.SchedulerWatcherPodSuccessDeletion)
 		s.watchDeletionsMetric.Inc()
 	}
 }
