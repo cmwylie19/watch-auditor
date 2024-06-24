@@ -17,12 +17,12 @@ Usage:
   watch-auditor serve [flags]
 
 Flags:
-  -e, --every duration          Interval to check in seconds (default 30s) (default 30s)
+  -e, --every duration          Interval to check in seconds (default 30s)
   -f, --failure-threshold int   Failure threshold to roll watch controller pod (default 3)
   -h, --help                    help for serve
   -l, --log-level string        Log level (debug, info, error) (default "info")
   -m, --mode string             Mode to run in (audit, enforcing) (default "enforcing")
-  -p, --port int                Port to listen on (default: 8080) (default 8080)
+  -p, --port int                Port to listen on (default 8080)
 ```
 
 
