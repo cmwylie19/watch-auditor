@@ -169,7 +169,7 @@ watch_controller_failures_total 10 # IMPORTANT!!!
 ## Developing
 
 
-Reallll quick restart/reset of simulated environment (for Mac, use the Makefile for a linux build):
+Reallll quick restart/reset of simulated environment (for Mac):
 
 ```bash
 k3d cluster delete --all;
