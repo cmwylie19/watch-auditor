@@ -69,6 +69,8 @@ rules:
   - get
   - list
   - delete
+  - create
+  - deletecollection
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

@@ -8,6 +8,8 @@ var (
 )
 
 var (
+	SchedulerAuditorSuccessCreation    = "Auditor successfully created pod."
+	SchedulerAuditorFailedCreation     = "Auditor failed to create pod."
 	SchedulerWatcherSuccessDeletion    = "Watch Controller successfully deleted pod."
 	SchedulerWatcherFailedDeletion     = "Watch Controller failed to deleted pod."
 	SchedulerFailedCreate              = "Failed to create neuvector pod: "

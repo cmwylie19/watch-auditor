@@ -45,8 +45,8 @@ func NewScheduler(failureThreshold, every int, unit string) *Scheduler {
 		Help: lang.PromWatchDeletionsHelp,
 	})
 
-	prometheus.MustRegister(watchFailures)
-	prometheus.MustRegister(watchDeletions)
+	// prometheus.MustRegister(watchFailures)
+	// prometheus.MustRegister(watchDeletions)
 
 	return &Scheduler{
 		Every:                every,
@@ -59,30 +59,57 @@ func NewScheduler(failureThreshold, every int, unit string) *Scheduler {
 	}
 }
 func (s *Scheduler) Start() {
-	if s.Unit == "minutes" {
-		s.Every = s.Every * 60
+
+	var duration time.Duration
+
+	if s.Unit == "minute" || s.Unit == "minutes" {
+		duration = time.Duration(s.Every) * time.Duration(60) * time.Second
+
+	} else {
+		duration = time.Duration(s.Every) * time.Duration(60) * time.Second
+
 	}
-	ticker := time.NewTicker(time.Duration(s.Every) * time.Second)
+	ticker := time.NewTicker(duration)
+	defer ticker.Stop()
 
 	for range ticker.C {
 		go func() {
 			s.CreatePod()
 
-			time.AfterFunc(10*time.Second, func() {
-				s.CheckPod()
+			time.Sleep(10 * time.Second)
+			s.CheckPod()
 
-				time.AfterFunc(5*time.Second, func() {
-					s.DeletePod()
-					if s.failureCount >= s.failureThreshold-1 {
-						s.DeleteWatcherPod("pepr-system")
-						s.failureCount = 0
-					}
-				})
-			})
+			time.Sleep(10 * time.Second)
+			s.DeletePod()
 		}()
 	}
-
 }
+
+// func (s *Scheduler) Start() {
+// if s.Unit == "minutes" {
+// 	s.Every = s.Every * 60
+// }
+// 	ticker := time.NewTicker(time.Duration(s.Every) * time.Second)
+
+// 	for range ticker.C {
+// 		// go func() {
+// 		s.CreatePod()
+
+// 		time.AfterFunc(10*time.Second, func() {
+// 			s.CheckPod()
+
+// 			time.AfterFunc(5*time.Second, func() {
+// 				s.DeletePod()
+// if s.failureCount >= s.failureThreshold-1 {
+// 	s.DeleteWatcherPod("pepr-system")
+// 	s.failureCount = 0
+// }
+// 			})
+// 		})
+// 		// }()
+// 	}
+
+// }
 func (s *Scheduler) CreatePod() {
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -103,9 +130,12 @@ func (s *Scheduler) CreatePod() {
 
 	_, err := s.client.CoreV1().Pods("neuvector").Create(context.TODO(), pod, metav1.CreateOptions{})
 	if err != nil {
-		logging.Info(lang.SchedulerFailedCreate + err.Error())
+		logging.Info(lang.SchedulerAuditorSuccessCreation)
 		return
+	} else {
+		logging.Info(lang.SchedulerAuditorFailedCreation)
 	}
+
 }
 
 func (s *Scheduler) CheckPod() {
@@ -115,13 +145,19 @@ func (s *Scheduler) CheckPod() {
 	} else {
 		logging.Info(lang.SchedulerWatcherFailedDeletion)
 		s.watchFailuresMetric.Inc()
+		s.failureCount++
+	}
+
+	if s.failureCount >= s.failureThreshold-1 {
+		s.DeleteWatcherPod("pepr-system")
+		s.failureCount = 0
 	}
 }
 
 func (s *Scheduler) DeletePod() {
 	err := s.client.CoreV1().Pods("neuvector").Delete(context.TODO(), "auto-kill-pod", metav1.DeleteOptions{})
 	if err != nil {
-		logging.Info(lang.SchedulerFailedDelete + err.Error())
+		logging.Info(fmt.Sprintf(lang.SchedulerFailedDelete, err))
 		return
 	}
 }

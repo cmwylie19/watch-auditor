@@ -35,7 +35,6 @@ var (
 	port             int
 	every            int
 	unit             string
-	metrics          bool
 	logLevel         string
 	mode             string
 	failureThreshold int
@@ -71,9 +70,8 @@ func init() {
 		},
 	}
 	serveCmd.PersistentFlags().IntVarP(&port, "port", "p", 8080, "Port to listen on (default: 8080)")
-	serveCmd.PersistentFlags().IntVarP(&every, "every", "e", 1, "Interval to check")
-	serveCmd.PersistentFlags().StringVarP(&unit, "unit", "u", "minute", "Unit of time to check (minute, hour, day)")
-	serveCmd.PersistentFlags().BoolVar(&metrics, "metrics", true, "Enable metrics")
+	serveCmd.PersistentFlags().IntVarP(&every, "every", "e", 30, "Interval to check")
+	serveCmd.PersistentFlags().StringVarP(&unit, "unit", "u", "second", "Unit of time to check (second, minute)")
 	serveCmd.Flags().IntVarP(&failureThreshold, "failure-threshold", "f", 3, "Failure threshold to roll watch controller pod")
 	serveCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", "Log level (debug, info, error)")
 	serveCmd.PersistentFlags().StringVarP(&mode, "mode", "m", "enforcing", "Mode to run in (audit, enforcing)")

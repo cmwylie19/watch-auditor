@@ -27,7 +27,53 @@ k3d cluster create;
 docker build -t watch-auditor:dev .;
 k3d image import watch-auditor:dev -c k3s-default  
 k apply -f k8s
+
+istioctl install --set profile=demo -y
+k create ns pepr-system
+k create ns neuvector
+k label ns neuvector istio-injection=enabled
+k apply -f -<<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: pepr-deploy
+    pepr.dev/controller: watcher
+  name: pepr-deploy
+  namespace: pepr-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pepr-deploy
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: pepr-deploy
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        resources: {}
+status: {}
+EOF
+k run curler -n watch-auditor --image=nginx
 ```
 
+Check the k3d images  
+```bash
 docker exec -it k3d-k3s-default-server-0 crictl images
 ```
+
+Logs and metrics 
+```bash
+k logs -n watch-auditor -l app=watch-auditor -f
+
+
+k exec -it -n watch-auditor curler -- curl watch-auditor:8080/metrics
+```
+
+
