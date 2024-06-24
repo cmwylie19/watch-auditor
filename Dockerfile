@@ -12,5 +12,4 @@ FROM scratch
 WORKDIR /app
 COPY --from=builder /app/watch-auditor ./
 
-# # Set the entrypoint to run the application
 ENTRYPOINT ["./watch-auditor"]
