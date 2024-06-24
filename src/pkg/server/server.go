@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/cmwylie19/watch-auditor/src/pkg/handlers"
 	"github.com/cmwylie19/watch-auditor/src/pkg/scheduler"
@@ -10,9 +11,8 @@ import (
 )
 
 type Server struct {
-	Port             int    `json:"port"`
-	Every            int    `json:"every"`
-	Unit             string `json:"unit"`
+	Port             int           `json:"port"`
+	Every            time.Duration `json:"every"`
 	Handlers         *handlers.Handlers
 	Mode             string `json:"mode"`
 	FailureThreshold int    `json:"failureThreshold"`
@@ -21,7 +21,7 @@ type Server struct {
 func (s *Server) Start() error {
 	http.HandleFunc("/healthz", s.Handlers.Healthz)
 	http.Handle("/metrics", promhttp.Handler())
-	scheduler := scheduler.NewScheduler(s.FailureThreshold, s.Every, s.Unit)
+	scheduler := scheduler.NewScheduler(s.FailureThreshold, s.Every)
 	go scheduler.Start()
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.Port), nil)
 }

@@ -16,8 +16,7 @@ import (
 )
 
 type Scheduler struct {
-	Every                int
-	Unit                 string
+	Every                time.Duration
 	client               *kubernetes.Clientset
 	watchFailuresMetric  prometheus.Counter
 	watchDeletionsMetric prometheus.Counter
@@ -25,7 +24,7 @@ type Scheduler struct {
 	failureCount         int
 }
 
-func NewScheduler(failureThreshold, every int, unit string) *Scheduler {
+func NewScheduler(failureThreshold int, every time.Duration) *Scheduler {
 
 	config, err := rest.InClusterConfig()
 	if err != nil {
@@ -50,7 +49,6 @@ func NewScheduler(failureThreshold, every int, unit string) *Scheduler {
 
 	return &Scheduler{
 		Every:                every,
-		Unit:                 unit,
 		client:               clientset,
 		watchFailuresMetric:  watchFailures,
 		watchDeletionsMetric: watchDeletions,
@@ -60,16 +58,7 @@ func NewScheduler(failureThreshold, every int, unit string) *Scheduler {
 }
 func (s *Scheduler) Start() {
 
-	var duration time.Duration
-
-	if s.Unit == "minute" || s.Unit == "minutes" {
-		duration = time.Duration(s.Every) * time.Duration(60) * time.Second
-
-	} else {
-		duration = time.Duration(s.Every) * time.Duration(60) * time.Second
-
-	}
-	ticker := time.NewTicker(duration)
+	ticker := time.NewTicker(time.Duration(s.Every))
 	defer ticker.Stop()
 
 	for range ticker.C {
@@ -130,10 +119,11 @@ func (s *Scheduler) CreatePod() {
 
 	_, err := s.client.CoreV1().Pods("neuvector").Create(context.TODO(), pod, metav1.CreateOptions{})
 	if err != nil {
-		logging.Info(lang.SchedulerAuditorSuccessCreation)
+		logging.Info(lang.SchedulerAuditorFailedCreation)
+
 		return
 	} else {
-		logging.Info(lang.SchedulerAuditorFailedCreation)
+		logging.Info(lang.SchedulerAuditorSuccessCreation)
 	}
 
 }
@@ -148,7 +138,7 @@ func (s *Scheduler) CheckPod() {
 		s.failureCount++
 	}
 
-	if s.failureCount >= s.failureThreshold-1 {
+	if s.failureCount >= s.failureThreshold {
 		s.DeleteWatcherPod("pepr-system")
 		s.failureCount = 0
 	}

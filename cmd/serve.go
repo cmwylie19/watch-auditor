@@ -24,6 +24,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/cmwylie19/watch-auditor/src/config/lang"
 	"github.com/cmwylie19/watch-auditor/src/pkg/logging"
@@ -33,8 +34,7 @@ import (
 
 var (
 	port             int
-	every            int
-	unit             string
+	every            time.Duration
 	logLevel         string
 	mode             string
 	failureThreshold int
@@ -57,7 +57,6 @@ func init() {
 			server := server.Server{
 				Port:             port,
 				Every:            every,
-				Unit:             unit,
 				Mode:             mode,
 				FailureThreshold: failureThreshold,
 			}
@@ -70,8 +69,7 @@ func init() {
 		},
 	}
 	serveCmd.PersistentFlags().IntVarP(&port, "port", "p", 8080, "Port to listen on (default: 8080)")
-	serveCmd.PersistentFlags().IntVarP(&every, "every", "e", 30, "Interval to check")
-	serveCmd.PersistentFlags().StringVarP(&unit, "unit", "u", "second", "Unit of time to check (second, minute)")
+	serveCmd.PersistentFlags().DurationVarP(&every, "every", "e", 30*time.Second, "Interval to check in seconds (default 30s)")
 	serveCmd.Flags().IntVarP(&failureThreshold, "failure-threshold", "f", 3, "Failure threshold to roll watch controller pod")
 	serveCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", "Log level (debug, info, error)")
 	serveCmd.PersistentFlags().StringVarP(&mode, "mode", "m", "enforcing", "Mode to run in (audit, enforcing)")
