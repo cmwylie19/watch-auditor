@@ -77,7 +77,5 @@ k logs -n watch-auditor -l app=watch-auditor -f
 k exec -it -n watch-auditor curler -- curl watch-auditor:8080/metrics
 ```
 
-TODO
-- [ ] Pass in failure mode
 
 

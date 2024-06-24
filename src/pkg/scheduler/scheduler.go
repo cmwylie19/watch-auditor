@@ -21,9 +21,10 @@ type Scheduler struct {
 	watchDeletionsMetric prometheus.Counter
 	failureThreshold     int
 	failureCount         int
+	Mode                 string
 }
 
-func NewScheduler(failureThreshold int, every time.Duration) *Scheduler {
+func NewScheduler(failureThreshold int, every time.Duration, mode string) *Scheduler {
 
 	config, err := rest.InClusterConfig()
 	if err != nil {
@@ -53,6 +54,7 @@ func NewScheduler(failureThreshold int, every time.Duration) *Scheduler {
 		watchDeletionsMetric: watchDeletions,
 		failureThreshold:     failureThreshold,
 		failureCount:         0,
+		Mode:                 mode,
 	}
 }
 func (s *Scheduler) Start() {
@@ -138,7 +140,9 @@ func (s *Scheduler) CheckPod() {
 	}
 
 	if s.failureCount >= s.failureThreshold {
-		s.DeleteWatcherPod("pepr-system")
+		if s.Mode == "enforcing" {
+			s.DeleteWatcherPod("pepr-system")
+		}
 		s.failureCount = 0
 	}
 }

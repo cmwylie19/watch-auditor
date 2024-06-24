@@ -21,7 +21,7 @@ type Server struct {
 func (s *Server) Start() error {
 	http.HandleFunc("/healthz", s.Handlers.Healthz)
 	http.Handle("/metrics", promhttp.Handler())
-	scheduler := scheduler.NewScheduler(s.FailureThreshold, s.Every)
+	scheduler := scheduler.NewScheduler(s.FailureThreshold, s.Every, s.Mode)
 	go scheduler.Start()
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.Port), nil)
 }
