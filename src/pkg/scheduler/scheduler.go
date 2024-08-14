@@ -17,14 +17,10 @@ import (
 )
 
 type Scheduler struct {
-	Every                time.Duration
-	client               *kubernetes.Clientset
-	watchFailuresMetric  prometheus.Counter
-	watchDeletionsMetric prometheus.Counter
-	failureThreshold     int
-	failureCount         int
-	Mode                 string
-	Namespace            string
+	Every               time.Duration
+	client              *kubernetes.Clientset
+	watchFailuresMetric prometheus.Counter
+	Namespace           string
 }
 
 func NewScheduler(every time.Duration, namespace string) *Scheduler {
@@ -55,13 +51,13 @@ func (s *Scheduler) Start() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		id := uuid.New()
+		id := uuid.New().String()[:5]
 
 		go func() {
-			s.CreatePod(id.String())
+			s.CreatePod(id)
 
 			time.Sleep(10 * time.Second)
-			s.CheckPod(id.String())
+			s.CheckPod(id)
 		}()
 	}
 }

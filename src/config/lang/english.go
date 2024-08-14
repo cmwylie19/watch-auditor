@@ -12,7 +12,7 @@ var (
 	SchedulerAuditorFailedCreation  = "Auditor failed to create pod: %s. %s"
 	SchedulerAuditorFailedDeletion  = "Auditor failed to delete pod"
 	SchedulerWatcherSuccessDeletion = "Watch Controller successfully deleted pod: %s"
-	SchedulerWatcherFailedDeletion  = "Watch Controller failed to deleted pod: %s"
+	SchedulerWatcherFailedDeletion  = "Watch Controller failed to deleted pod: %s."
 )
 
 var (
