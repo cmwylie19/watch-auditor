@@ -2,10 +2,12 @@ package scheduler
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/cmwylie19/watch-auditor/src/config/lang"
 	"github.com/cmwylie19/watch-auditor/src/pkg/logging"
+	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	v1 "k8s.io/api/core/v1"
@@ -22,9 +24,10 @@ type Scheduler struct {
 	failureThreshold     int
 	failureCount         int
 	Mode                 string
+	Namespace            string
 }
 
-func NewScheduler(failureThreshold int, every time.Duration, mode string) *Scheduler {
+func NewScheduler(failureThreshold int, every time.Duration, mode, namespace string) *Scheduler {
 
 	config, err := rest.InClusterConfig()
 	if err != nil {
@@ -44,9 +47,6 @@ func NewScheduler(failureThreshold int, every time.Duration, mode string) *Sched
 		Help: lang.PromWatchDeletionsHelp,
 	})
 
-	// prometheus.MustRegister(watchFailures)
-	// prometheus.MustRegister(watchDeletions)
-
 	return &Scheduler{
 		Every:                every,
 		client:               clientset,
@@ -55,6 +55,7 @@ func NewScheduler(failureThreshold int, every time.Duration, mode string) *Sched
 		failureThreshold:     failureThreshold,
 		failureCount:         0,
 		Mode:                 mode,
+		Namespace:            namespace,
 	}
 }
 func (s *Scheduler) Start() {
@@ -63,48 +64,25 @@ func (s *Scheduler) Start() {
 	defer ticker.Stop()
 
 	for range ticker.C {
+		id := uuid.New()
+
 		go func() {
-			s.CreatePod()
+			s.CreatePod(id.String())
 
 			time.Sleep(10 * time.Second)
-			s.CheckPod()
+			s.CheckPod(id.String())
 
-			time.Sleep(10 * time.Second)
-			s.DeletePod()
+			// time.Sleep(5 * time.Second)
+			// s.DeletePod()
 		}()
 	}
 }
 
-// func (s *Scheduler) Start() {
-// if s.Unit == "minutes" {
-// 	s.Every = s.Every * 60
-// }
-// 	ticker := time.NewTicker(time.Duration(s.Every) * time.Second)
-
-// 	for range ticker.C {
-// 		// go func() {
-// 		s.CreatePod()
-
-// 		time.AfterFunc(10*time.Second, func() {
-// 			s.CheckPod()
-
-// 			time.AfterFunc(5*time.Second, func() {
-// 				s.DeletePod()
-// if s.failureCount >= s.failureThreshold-1 {
-// 	s.DeleteWatcherPod("pepr-system")
-// 	s.failureCount = 0
-// }
-// 			})
-// 		})
-// 		// }()
-// 	}
-
-// }
-func (s *Scheduler) CreatePod() {
+func (s *Scheduler) CreatePod(name string) {
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "auto-kill-pod",
-			Namespace: "neuvector",
+			Name:      fmt.Sprintf("auto-%s", name),
+			Namespace: s.Namespace,
 		},
 		Spec: v1.PodSpec{
 			Containers: []v1.Container{
@@ -118,7 +96,7 @@ func (s *Scheduler) CreatePod() {
 		},
 	}
 
-	_, err := s.client.CoreV1().Pods("neuvector").Create(context.TODO(), pod, metav1.CreateOptions{})
+	_, err := s.client.CoreV1().Pods(s.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
 	if err != nil {
 		logging.Info(lang.SchedulerAuditorFailedCreation)
 
@@ -129,8 +107,8 @@ func (s *Scheduler) CreatePod() {
 
 }
 
-func (s *Scheduler) CheckPod() {
-	_, err := s.client.CoreV1().Pods("neuvector").Get(context.TODO(), "auto-kill-pod", metav1.GetOptions{})
+func (s *Scheduler) CheckPod(name string) {
+	_, err := s.client.CoreV1().Pods(s.Namespace).Get(context.TODO(), fmt.Sprintf("auto-%s", name), metav1.GetOptions{})
 	if err != nil {
 		logging.Info(lang.SchedulerWatcherSuccessDeletion)
 	} else {
@@ -148,7 +126,7 @@ func (s *Scheduler) CheckPod() {
 }
 
 func (s *Scheduler) DeletePod() {
-	err := s.client.CoreV1().Pods("neuvector").Delete(context.TODO(), "auto-kill-pod", metav1.DeleteOptions{})
+	err := s.client.CoreV1().Pods(s.Namespace).Delete(context.TODO(), "auto-kill-pod", metav1.DeleteOptions{})
 	if err != nil {
 		logging.Info(lang.SchedulerAuditorFailedDeletion)
 		return

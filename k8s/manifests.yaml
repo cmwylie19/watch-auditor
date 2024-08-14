@@ -26,9 +26,9 @@ spec:
       serviceAccountName: watch-auditor
       containers:
       - image: watch-auditor:dev
-        name: watch-auditor
+        name: watch-auditor 
         imagePullPolicy: IfNotPresent
-        args: ["serve"]
+        args: ["serve", "--namespace=pepr-demo"]
         ports:
         - containerPort: 8080
         resources: {}

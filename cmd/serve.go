@@ -38,6 +38,7 @@ var (
 	logLevel         string
 	mode             string
 	failureThreshold int
+	namespace        string
 )
 
 func init() {
@@ -51,7 +52,7 @@ func init() {
 			logging.Info(fmt.Sprintf("Server is starting on %d", port))
 			if mode != "audit" && mode != "enforcing" {
 				logging.Debug("Mode must be either 'audit' or 'enforcing', defaulting to 'enforcing'")
-				mode = "enforcing"
+				mode = "audit"
 			}
 
 			server := server.Server{
@@ -73,5 +74,6 @@ func init() {
 	serveCmd.Flags().IntVarP(&failureThreshold, "failure-threshold", "f", 3, "Failure threshold to roll watch controller pod")
 	serveCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", "Log level (debug, info, error)")
 	serveCmd.PersistentFlags().StringVarP(&mode, "mode", "m", "enforcing", "Mode to run in (audit, enforcing)")
+	serveCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "pepr-demo", "Namespace to audit")
 	rootCmd.AddCommand(serveCmd)
 }

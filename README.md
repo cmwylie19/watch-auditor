@@ -21,8 +21,9 @@ Flags:
   -f, --failure-threshold int   Failure threshold to roll watch controller pod (default 3)
   -h, --help                    help for serve
   -l, --log-level string        Log level (debug, info, error) (default "info")
-  -m, --mode string             Mode to run in (audit, enforcing) (default "enforcing")
+  -m, --mode string             Mode to run in (audit, enforcing) (default "audit")
   -p, --port int                Port to listen on (default 8080)
+  -n, --namespace string        Namespace to check (default "pepr-demo")
 ```
 
 
@@ -175,8 +176,8 @@ Reallll quick restart/reset of simulated environment (for Mac):
 k3d cluster delete --all;
 docker system prune -a -f 
 k3d cluster create;
-docker build -t watch-auditor:dev .;
-k3d image import watch-auditor:dev -c k3s-default  
+docker build -t watch-auditor:dev -f Dockerfile.arm .;
+k3d image import watch-auditor:dev -c k3s-default   #pepr-dev
 k apply -f k8s
 
 istioctl install --set profile=demo -y
