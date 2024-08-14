@@ -10,8 +10,6 @@ import (
 func SetupLogging(level string) {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	log.Logger = zerolog.New(os.Stderr).With().Timestamp().Logger()
-	//log.Output(zerolog.ConsoleWriter{Out: os.Stderr, NoColor: true}).With().Logger()
-
 	setLevel(level)
 }
 

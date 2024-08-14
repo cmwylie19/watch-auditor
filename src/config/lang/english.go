@@ -8,16 +8,11 @@ var (
 )
 
 var (
-	SchedulerAuditorSuccessCreation    = "Auditor successfully created pod."
-	SchedulerAuditorFailedCreation     = "Auditor failed to create pod."
-	SchedulerAuditorSuccessDeletion    = "Auditor successfully deleted pod."
-	SchedulerAuditorFailedDeletion     = "Auditor failed to delete pod."
-	SchedulerWatcherSuccessDeletion    = "Watch Controller successfully deleted pod."
-	SchedulerWatcherFailedDeletion     = "Watch Controller failed to deleted pod."
-	SchedulerFailedCreate              = "Failed to create neuvector pod: "
-	SchedulerFailedDelete              = "Failed to delete neuvector pod: "
-	SchedulerWatcherPodSuccessDeletion = "Successfully deleted watcher pod in pepr-system"
-	SchedulerWatcherPodFailedDeletion  = "Failed to delete watcher pod in pepr-system"
+	SchedulerAuditorSuccessCreation = "Auditor successfully created pod: %s"
+	SchedulerAuditorFailedCreation  = "Auditor failed to create pod: %s. %s"
+	SchedulerAuditorFailedDeletion  = "Auditor failed to delete pod"
+	SchedulerWatcherSuccessDeletion = "Watch Controller successfully deleted pod: %s"
+	SchedulerWatcherFailedDeletion  = "Watch Controller failed to deleted pod: %s"
 )
 
 var (

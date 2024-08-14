@@ -5,6 +5,12 @@ metadata:
 spec: {}
 status: {}
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: watch-auditor
+  namespace: watch-auditor
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -48,12 +54,6 @@ spec:
     targetPort: 8080
   selector:
     app: watch-auditor
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: watch-auditor
-  namespace: watch-auditor
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

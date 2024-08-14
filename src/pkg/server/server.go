@@ -11,18 +11,16 @@ import (
 )
 
 type Server struct {
-	Port             int           `json:"port"`
-	Every            time.Duration `json:"every"`
-	Handlers         *handlers.Handlers
-	Mode             string `json:"mode"`
-	FailureThreshold int    `json:"failureThreshold"`
-	Namespace        string `json:"namespace"`
+	Port      int           `json:"port"`
+	Every     time.Duration `json:"every"`
+	Handlers  *handlers.Handlers
+	Namespace string `json:"namespace"`
 }
 
 func (s *Server) Start() error {
 	http.HandleFunc("/healthz", s.Handlers.Healthz)
 	http.Handle("/metrics", promhttp.Handler())
-	scheduler := scheduler.NewScheduler(s.FailureThreshold, s.Every, s.Mode, s.Namespace)
+	scheduler := scheduler.NewScheduler(s.Every, s.Namespace)
 	go scheduler.Start()
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.Port), nil)
 }

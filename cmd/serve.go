@@ -33,12 +33,10 @@ import (
 )
 
 var (
-	port             int
-	every            time.Duration
-	logLevel         string
-	mode             string
-	failureThreshold int
-	namespace        string
+	port      int
+	every     time.Duration
+	logLevel  string
+	namespace string
 )
 
 func init() {
@@ -50,16 +48,11 @@ func init() {
 
 			logging.SetupLogging(logLevel)
 			logging.Info(fmt.Sprintf("Server is starting on %d", port))
-			if mode != "audit" && mode != "enforcing" {
-				logging.Debug("Mode must be either 'audit' or 'enforcing', defaulting to 'enforcing'")
-				mode = "audit"
-			}
 
 			server := server.Server{
-				Port:             port,
-				Every:            every,
-				Mode:             mode,
-				FailureThreshold: failureThreshold,
+				Port:      port,
+				Every:     every,
+				Namespace: namespace,
 			}
 
 			if err := server.Start(); err != nil {
@@ -71,9 +64,7 @@ func init() {
 	}
 	serveCmd.PersistentFlags().IntVarP(&port, "port", "p", 8080, "Port to listen on")
 	serveCmd.PersistentFlags().DurationVarP(&every, "every", "e", 30*time.Second, "Interval to check in seconds")
-	serveCmd.Flags().IntVarP(&failureThreshold, "failure-threshold", "f", 3, "Failure threshold to roll watch controller pod")
 	serveCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", "Log level (debug, info, error)")
-	serveCmd.PersistentFlags().StringVarP(&mode, "mode", "m", "enforcing", "Mode to run in (audit, enforcing)")
 	serveCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "pepr-demo", "Namespace to audit")
 	rootCmd.AddCommand(serveCmd)
 }

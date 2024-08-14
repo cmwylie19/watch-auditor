@@ -27,7 +27,7 @@ type Scheduler struct {
 	Namespace            string
 }
 
-func NewScheduler(failureThreshold int, every time.Duration, mode, namespace string) *Scheduler {
+func NewScheduler(every time.Duration, namespace string) *Scheduler {
 
 	config, err := rest.InClusterConfig()
 	if err != nil {
@@ -42,20 +42,11 @@ func NewScheduler(failureThreshold int, every time.Duration, mode, namespace str
 		Help: lang.PromWatchFailuresHelp,
 	})
 
-	watchDeletions := promauto.NewCounter(prometheus.CounterOpts{
-		Name: lang.PromWatchDeletionsName,
-		Help: lang.PromWatchDeletionsHelp,
-	})
-
 	return &Scheduler{
-		Every:                every,
-		client:               clientset,
-		watchFailuresMetric:  watchFailures,
-		watchDeletionsMetric: watchDeletions,
-		failureThreshold:     failureThreshold,
-		failureCount:         0,
-		Mode:                 mode,
-		Namespace:            namespace,
+		Every:               every,
+		client:              clientset,
+		watchFailuresMetric: watchFailures,
+		Namespace:           namespace,
 	}
 }
 func (s *Scheduler) Start() {
@@ -71,17 +62,15 @@ func (s *Scheduler) Start() {
 
 			time.Sleep(10 * time.Second)
 			s.CheckPod(id.String())
-
-			// time.Sleep(5 * time.Second)
-			// s.DeletePod()
 		}()
 	}
 }
 
 func (s *Scheduler) CreatePod(name string) {
+	var formattedName = fmt.Sprintf("auto-%s", name)
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("auto-%s", name),
+			Name:      formattedName,
 			Namespace: s.Namespace,
 		},
 		Spec: v1.PodSpec{
@@ -98,52 +87,22 @@ func (s *Scheduler) CreatePod(name string) {
 
 	_, err := s.client.CoreV1().Pods(s.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
 	if err != nil {
-		logging.Info(lang.SchedulerAuditorFailedCreation)
+		logging.Info(fmt.Sprintf(lang.SchedulerAuditorFailedCreation, formattedName, err.Error()))
 
 		return
 	} else {
-		logging.Info(lang.SchedulerAuditorSuccessCreation)
+		logging.Info(fmt.Sprintf(lang.SchedulerAuditorSuccessCreation, formattedName))
 	}
 
 }
 
 func (s *Scheduler) CheckPod(name string) {
-	_, err := s.client.CoreV1().Pods(s.Namespace).Get(context.TODO(), fmt.Sprintf("auto-%s", name), metav1.GetOptions{})
+	var formattedName = fmt.Sprintf("auto-%s", name)
+	_, err := s.client.CoreV1().Pods(s.Namespace).Get(context.TODO(), formattedName, metav1.GetOptions{})
 	if err != nil {
-		logging.Info(lang.SchedulerWatcherSuccessDeletion)
+		logging.Info(fmt.Sprintf(lang.SchedulerWatcherSuccessDeletion, formattedName))
 	} else {
-		logging.Info(lang.SchedulerWatcherFailedDeletion)
+		logging.Info(fmt.Sprintf(lang.SchedulerWatcherFailedDeletion, formattedName))
 		s.watchFailuresMetric.Inc()
-		s.failureCount++
-	}
-
-	if s.failureCount >= s.failureThreshold {
-		if s.Mode == "enforcing" {
-			s.DeleteWatcherPod("pepr-system")
-		}
-		s.failureCount = 0
-	}
-}
-
-func (s *Scheduler) DeletePod() {
-	err := s.client.CoreV1().Pods(s.Namespace).Delete(context.TODO(), "auto-kill-pod", metav1.DeleteOptions{})
-	if err != nil {
-		logging.Info(lang.SchedulerAuditorFailedDeletion)
-		return
-	} else {
-		logging.Info(lang.SchedulerAuditorSuccessDeletion)
-	}
-}
-
-func (s *Scheduler) DeleteWatcherPod(namespace string) {
-	labelSelector := "pepr.dev/controller=watcher"
-
-	if err := s.client.CoreV1().Pods(namespace).DeleteCollection(context.TODO(), metav1.DeleteOptions{}, metav1.ListOptions{
-		LabelSelector: labelSelector,
-	}); err != nil {
-		logging.Info(lang.SchedulerWatcherPodFailedDeletion)
-	} else {
-		logging.Info(lang.SchedulerWatcherPodSuccessDeletion)
-		s.watchDeletionsMetric.Inc()
 	}
 }
