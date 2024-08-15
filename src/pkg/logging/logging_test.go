@@ -37,17 +37,17 @@ func TestLogger_SetLevel(t *testing.T) {
 	logger.SetLevel(slog.LevelDebug)
 	logger.Debug("This is a debug message")
 	validateLogFile(t, filePath, `"level":"DEBUG"`)
-	clearFile(filePath)
+	clearFile(t, filePath)
 
 	logger.SetLevel(slog.LevelInfo)
 	logger.Info("This is an info message")
 	validateLogFile(t, filePath, `"level":"INFO"`)
-	clearFile(filePath)
+	clearFile(t, filePath)
 
 	logger.SetLevel(slog.LevelWarn)
 	logger.Warn("This is a warning message")
 	validateLogFile(t, filePath, `"level":"WARN"`)
-	clearFile(filePath)
+	clearFile(t, filePath)
 
 	logger.SetLevel(slog.LevelError)
 	logger.Error("This is an error message")
@@ -150,6 +150,9 @@ func contains(content []byte, expected string) bool {
 	return bytes.Contains(content, []byte(expected))
 }
 
-func clearFile(filePath string) {
-	os.Truncate(filePath, 0)
+func clearFile(t *testing.T, filePath string) {
+	err := os.Truncate(filePath, 0)
+	if err != nil {
+		t.Fatalf("Failed to clear log file: %v", err)
+	}
 }

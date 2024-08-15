@@ -28,6 +28,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// nolint:unused
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands

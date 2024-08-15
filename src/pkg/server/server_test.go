@@ -26,7 +26,7 @@ func TestServer_Start(t *testing.T) {
 
 	go func() {
 		if err := server.Start(); err != nil && err != http.ErrServerClosed {
-			t.Fatalf("Server failed to start: %v", err)
+			t.Errorf("Server failed to start: %v", err)
 		}
 	}()
 

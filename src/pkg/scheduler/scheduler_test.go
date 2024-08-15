@@ -53,7 +53,10 @@ func TestScheduler_CheckPod(t *testing.T) {
 	name := "testpod"
 	scheduler.CreatePod(name)
 
-	clientset.CoreV1().Pods("default").Delete(context.TODO(), "auto-"+name, metav1.DeleteOptions{})
+	err := clientset.CoreV1().Pods("default").Delete(context.TODO(), "auto-"+name, metav1.DeleteOptions{})
+	if err != nil {
+		t.Fatalf("Failed to delete pod: %v", err)
+	}
 
 	scheduler.CheckPod(name)
 
