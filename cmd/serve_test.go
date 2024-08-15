@@ -19,7 +19,6 @@ func TestServeCommand(t *testing.T) {
 		},
 	}
 
-	// Manually add the flags as done in the init() function
 	serveCmd.PersistentFlags().IntVarP(&port, "port", "p", 8080, "Port to listen on")
 	serveCmd.PersistentFlags().DurationVarP(&every, "every", "e", 30*time.Second, "Interval to check in seconds")
 	serveCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", "Log level (debug, info, error)")
@@ -31,7 +30,6 @@ func TestServeCommand(t *testing.T) {
 		t.Fatalf("Command execution failed: %v", err)
 	}
 
-	// Validate the logger captured the expected message
 	if len(logger.Messages) == 0 || logger.Messages[0] != "INFO: Server command executed" {
 		t.Errorf("Expected 'Server command executed' log message, got %v", logger.Messages)
 	}

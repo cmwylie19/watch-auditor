@@ -74,13 +74,11 @@ func setupKindCluster() string {
 		Expect(err).NotTo(HaveOccurred(), "Failed to create the kind cluster")
 	}
 
-	// Set kubeConfigPath to the default kubeconfig path used by kind
 	kubeConfigPath := os.Getenv("HOME") + "/.kube/config"
 	return kubeConfigPath
 }
 
 func teardownKindCluster(kubeConfigPath string) {
-	// Delete the kind cluster
 	cmd := exec.Command("kind", "delete", "cluster", "--kubeconfig", kubeConfigPath)
 	err := cmd.Run()
 	Expect(err).NotTo(HaveOccurred())
@@ -88,7 +86,6 @@ func teardownKindCluster(kubeConfigPath string) {
 }
 
 func deployApplication(kubeConfigPath string) {
-	// Deploy your application using kubectl or any other method
 	cmd := exec.Command("kubectl", "apply", "-k", "../kustomize/overlays/dev", "--kubeconfig", kubeConfigPath)
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -101,7 +98,6 @@ func deployApplication(kubeConfigPath string) {
 }
 
 func getPodLogs(kubeConfigPath string) string {
-	// Get logs from the deployed pod
 	cmd := exec.Command("kubectl", "logs", "deploy/watch-auditor", "-n", "watch-auditor", "--kubeconfig", kubeConfigPath)
 	var out bytes.Buffer
 	cmd.Stdout = &out

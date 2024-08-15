@@ -33,7 +33,6 @@ func TestServer_Start(t *testing.T) {
 	// Give the server a moment to start
 	time.Sleep(100 * time.Millisecond)
 
-	// Test the /healthz endpoint
 	req, err := http.NewRequest("GET", "http://localhost:8080/healthz", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)

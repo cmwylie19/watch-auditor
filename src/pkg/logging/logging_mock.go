@@ -4,7 +4,6 @@ import (
 	"log/slog"
 )
 
-// MockLogger is a simple mock implementation of the LoggerInterface.
 type MockLogger struct {
 	Messages []string
 }
