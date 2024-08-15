@@ -53,10 +53,8 @@ func TestScheduler_CheckPod(t *testing.T) {
 	name := "testpod"
 	scheduler.CreatePod(name)
 
-	// Simulate deleting the pod to test the check
 	clientset.CoreV1().Pods("default").Delete(context.TODO(), "auto-"+name, metav1.DeleteOptions{})
 
-	// Now call CheckPod which should detect the pod was deleted
 	scheduler.CheckPod(name)
 
 	expectedLog := "INFO: Watch Controller successfully deleted pod: auto-testpod"

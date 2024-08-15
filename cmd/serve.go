@@ -35,7 +35,6 @@ func init() {
 			}
 			defer logger.CloseFile()
 
-			// Set the logging level based on the command-line flag
 			switch logLevel {
 			case "debug":
 				logger.SetLevel(slog.LevelDebug)
@@ -49,7 +48,6 @@ func init() {
 				logger.SetLevel(slog.LevelInfo) // Default to INFO level
 			}
 
-			// Initialize Kubernetes client
 			config, err := rest.InClusterConfig()
 			if err != nil {
 				logger.Error(fmt.Sprintf("Failed to create in-cluster config: %v", err))
@@ -62,13 +60,12 @@ func init() {
 				os.Exit(1)
 			}
 
-			// Create the server with the initialized Kubernetes client
 			server := server.Server{
 				Port:      port,
 				Every:     every,
 				Namespace: namespace,
 				Logger:    logger,
-				Client:    clientset, // Pass the Kubernetes client here
+				Client:    clientset,
 			}
 
 			if err := server.Start(); err != nil {
