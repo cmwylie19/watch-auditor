@@ -2,12 +2,22 @@
 
 IMAGE ?= cmwylie19/watch-auditor:v0.0.1
 IMAGE2 ?= watch-auditor
-compile: 
-	GOARCH=arm64 CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o watch-auditor main.go
-	mv watch-auditor image/watch-auditor
 
-just-build: 
-	docker buildx build --platform linux/amd64 -t $(IMAGE) .
+build-arm-image: 
+	docker build -t $(IMAGE) -f Dockerfile.arm .
 
-build-push-image: 
-	docker buildx build --push --platform linux/amd64 -t $(IMAGE) image/
+build-amd-image:
+	docker build -t $(IMAGE) -f Dockerfile.amd .
+
+build-push-arm-image: 
+	docker buildx build --push -t $(IMAGE) -f Dockerfile.arm .
+
+build-push-amd-image: 
+	docker buildx build --push -t $(IMAGE) -f Dockerfile.amd .
+
+unit-test:
+	go test -v ./...
+
+e2e-test:
+	ginkgo -v ./e2e
+

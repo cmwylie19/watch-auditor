@@ -1,3 +1,9 @@
 Dockerfile
 LICENSE
 README.md
+kustomize
+.gitignore
+Dockerfile.arm
+Dockerfile.amd
+Makefile
+e2e

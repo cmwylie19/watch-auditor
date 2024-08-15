@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: watch-auditor
+  name: watch-auditor
+  namespace: watch-auditor
+spec:
+  template:
+    spec:
+      containers:
+      - image: watch-auditor:dev
+        name: watch-auditor 
