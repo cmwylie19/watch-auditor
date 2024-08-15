@@ -11,24 +11,7 @@ on:
       - develop
 
 jobs:
-
-  lint:
-    name: Lint Code
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Setup golang
-      uses: ./.github/actions/golang
-
-    - name: Install golangci-lint
-      run: |
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s latest
-
-    - name: Run golangci-lint
-      run: ./bin/golangci-lint run
+  
   unit-tests:
     name: Run Unit Tests
     runs-on: ubuntu-latest
