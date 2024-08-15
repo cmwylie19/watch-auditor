@@ -6,6 +6,7 @@ The Watch Auditor is a tool that ensures that measures watch misses between Pepr
 - [Metrics](#metrics)
 - [Developing](#developing)
 - [Check Logs and Metrics](#check-logs-and-metrics)  
+- [Test](#test)
 
 ## Configurability:
 
