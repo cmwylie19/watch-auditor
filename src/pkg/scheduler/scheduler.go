@@ -18,21 +18,24 @@ import (
 
 type Scheduler struct {
 	Every               time.Duration
-	client              *kubernetes.Clientset
+	client              kubernetes.Interface
 	watchFailuresMetric prometheus.Counter
 	Namespace           string
+	Logger              logging.LoggerInterface
 }
 
-func NewScheduler(every time.Duration, namespace string) *Scheduler {
+func NewScheduler(every time.Duration, namespace string, log logging.LoggerInterface, client kubernetes.Interface) *Scheduler {
+	if client == nil {
+		config, err := rest.InClusterConfig()
+		if err != nil {
+			panic(err.Error())
+		}
+		client, err = kubernetes.NewForConfig(config)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
 
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		panic(err.Error())
-	}
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
 	watchFailures := promauto.NewCounter(prometheus.CounterOpts{
 		Name: lang.PromWatchFailuresName,
 		Help: lang.PromWatchFailuresHelp,
@@ -40,13 +43,14 @@ func NewScheduler(every time.Duration, namespace string) *Scheduler {
 
 	return &Scheduler{
 		Every:               every,
-		client:              clientset,
+		client:              client,
 		watchFailuresMetric: watchFailures,
 		Namespace:           namespace,
+		Logger:              log,
 	}
 }
-func (s *Scheduler) Start() {
 
+func (s *Scheduler) Start() {
 	ticker := time.NewTicker(time.Duration(s.Every))
 	defer ticker.Stop()
 
@@ -83,22 +87,19 @@ func (s *Scheduler) CreatePod(name string) {
 
 	_, err := s.client.CoreV1().Pods(s.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
 	if err != nil {
-		logging.Info(fmt.Sprintf(lang.SchedulerAuditorFailedCreation, formattedName, err.Error()))
-
+		s.Logger.Info(fmt.Sprintf(lang.SchedulerAuditorFailedCreation, formattedName, err.Error()))
 		return
-	} else {
-		logging.Info(fmt.Sprintf(lang.SchedulerAuditorSuccessCreation, formattedName))
 	}
-
+	s.Logger.Info(fmt.Sprintf(lang.SchedulerAuditorSuccessCreation, formattedName))
 }
 
 func (s *Scheduler) CheckPod(name string) {
 	var formattedName = fmt.Sprintf("auto-%s", name)
 	_, err := s.client.CoreV1().Pods(s.Namespace).Get(context.TODO(), formattedName, metav1.GetOptions{})
 	if err != nil {
-		logging.Info(fmt.Sprintf(lang.SchedulerWatcherSuccessDeletion, formattedName))
+		s.Logger.Info(fmt.Sprintf(lang.SchedulerWatcherSuccessDeletion, formattedName))
 	} else {
-		logging.Info(fmt.Sprintf(lang.SchedulerWatcherFailedDeletion, formattedName))
+		s.Logger.Info(fmt.Sprintf(lang.SchedulerWatcherFailedDeletion, formattedName))
 		s.watchFailuresMetric.Inc()
 	}
 }

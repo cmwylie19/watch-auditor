@@ -1,35 +1,17 @@
-/*
-Copyright © 2024 Case Wylie <casewylie@gmail.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
 package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"time"
 
 	"github.com/cmwylie19/watch-auditor/src/config/lang"
-	"github.com/cmwylie19/watch-auditor/src/pkg/logging"
+	logging "github.com/cmwylie19/watch-auditor/src/pkg/logging"
 	"github.com/cmwylie19/watch-auditor/src/pkg/server"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 var (
@@ -46,22 +28,58 @@ func init() {
 		Long:  lang.CmdServeLong,
 		Run: func(cmd *cobra.Command, args []string) {
 
-			logging.SetupLogging(logLevel)
-			logging.Info(fmt.Sprintf("Server is starting on %d", port))
+			logger, err := logging.NewLogger("")
+			if err != nil {
+				fmt.Printf("Failed to initialize logger: %v\n", err)
+				os.Exit(1)
+			}
+			defer logger.CloseFile()
 
+			// Set the logging level based on the command-line flag
+			switch logLevel {
+			case "debug":
+				logger.SetLevel(slog.LevelDebug)
+			case "info":
+				logger.SetLevel(slog.LevelInfo)
+			case "warn":
+				logger.SetLevel(slog.LevelWarn)
+			case "error":
+				logger.SetLevel(slog.LevelError)
+			default:
+				logger.SetLevel(slog.LevelInfo) // Default to INFO level
+			}
+
+			// Initialize Kubernetes client
+			config, err := rest.InClusterConfig()
+			if err != nil {
+				logger.Error(fmt.Sprintf("Failed to create in-cluster config: %v", err))
+				os.Exit(1)
+			}
+
+			clientset, err := kubernetes.NewForConfig(config)
+			if err != nil {
+				logger.Error(fmt.Sprintf("Failed to create Kubernetes client: %v", err))
+				os.Exit(1)
+			}
+
+			// Create the server with the initialized Kubernetes client
 			server := server.Server{
 				Port:      port,
 				Every:     every,
 				Namespace: namespace,
+				Logger:    logger,
+				Client:    clientset, // Pass the Kubernetes client here
 			}
 
 			if err := server.Start(); err != nil {
-				logging.Error(err.Error())
+				logger.Error(err.Error())
 				os.Exit(1)
 			}
 
+			logger.Info("Server started successfully")
 		},
 	}
+
 	serveCmd.PersistentFlags().IntVarP(&port, "port", "p", 8080, "Port to listen on")
 	serveCmd.PersistentFlags().DurationVarP(&every, "every", "e", 30*time.Second, "Interval to check in seconds")
 	serveCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", "Log level (debug, info, error)")

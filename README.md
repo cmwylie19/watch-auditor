@@ -176,8 +176,8 @@ Reallll quick restart/reset of simulated environment (for Mac):
 k3d cluster delete --all;
 docker system prune -a -f 
 k3d cluster create;
-docker build -t watch-auditor:dev -f Dockerfile.arm .;
-k3d image import watch-auditor:dev -c k3s-default   #pepr-dev
+docker build -t auditor:dev -f Dockerfile.arm .;
+k3d image import auditor:dev -c k3s-default   #pepr-dev
 k apply -f k8s
 
 istioctl install --set profile=demo -y

@@ -31,7 +31,7 @@ spec:
     spec:
       serviceAccountName: watch-auditor
       containers:
-      - image: watch-auditor:dev
+      - image: auditor:dev
         name: watch-auditor 
         imagePullPolicy: IfNotPresent
         args: ["serve", "--namespace=pepr-demo"]

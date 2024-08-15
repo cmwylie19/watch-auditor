@@ -1,7 +1,6 @@
 .DEFAULT_GOAL := docker-image
-# DON'T USE THIS! This is changed to build in the container and currently is not outfitted to build in linux.
-# It is just a POC that is rough around the edges
-IMAGE ?= cmwylie19/watch-auditor:latest
+
+IMAGE ?= cmwylie19/watch-auditor:v0.0.1
 IMAGE2 ?= watch-auditor
 compile: 
 	GOARCH=arm64 CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o watch-auditor main.go
