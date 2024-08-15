@@ -16,8 +16,8 @@ build-push-amd-image:
 	docker buildx build --push -t $(IMAGE) -f Dockerfile.amd .
 
 unit-test:
-	go test -v ./...
+	go test -v ./... -tags='!e2e'
 
 e2e-test:
-	ginkgo -v ./e2e
+	ginkgo -v --tags='e2e' ./e2e
 

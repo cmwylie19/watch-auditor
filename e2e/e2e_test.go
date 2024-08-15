@@ -1,3 +1,6 @@
+//go:build e2e
+// +build e2e
+
 package e2e_test
 
 import (
@@ -104,6 +107,5 @@ func getPodLogs(kubeConfigPath string) string {
 	cmd.Stdout = &out
 	err := cmd.Run()
 	Expect(err).NotTo(HaveOccurred())
-	GinkgoWriter.Write(out.Bytes())
 	return out.String()
 }
