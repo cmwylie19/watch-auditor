@@ -41,7 +41,7 @@ var _ = Describe("E2E Test", func() {
 })
 
 func buildImage() {
-	cmd := exec.Command("docker", "build", "-t", "watch-auditor:dev", "..", "-f", "../Dockerfile.arm")
+	cmd := exec.Command("docker", "build", "-t", "watch-auditor:ci", "..", "-f", "../Dockerfile.arm")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
@@ -52,7 +52,7 @@ func buildImage() {
 }
 
 func importImage() {
-	cmd := exec.Command("kind", "load", "docker-image", "watch-auditor:dev")
+	cmd := exec.Command("kind", "load", "docker-image", "watch-auditor:ci")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
@@ -86,7 +86,7 @@ func teardownKindCluster(kubeConfigPath string) {
 }
 
 func deployApplication(kubeConfigPath string) {
-	cmd := exec.Command("kubectl", "apply", "-k", "../kustomize/overlays/dev", "--kubeconfig", kubeConfigPath)
+	cmd := exec.Command("kubectl", "apply", "-k", "../kustomize/overlays/ci", "--kubeconfig", kubeConfigPath)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
