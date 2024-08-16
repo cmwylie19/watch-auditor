@@ -5,8 +5,7 @@ The Watch Auditor is a tool that ensures that measures watch misses between Pepr
 - [Configurability](#configurability)
 - [Metrics](#metrics)
 - [Developing](#developing)
-- [Check Logs and Metrics](#check-logs-and-metrics)  
-- [Test](#test)
+
 
 ## Configurability:
 
@@ -71,12 +70,3 @@ integration tests:
 make e2e-test
 ```
 
-
-
-## Check Logs and Metrics
-```bash
-k logs -n watch-auditor -l app=watch-auditor -f
-
-kubectl run curler -n watch-auditor --image=nginx
-k exec -it -n watch-auditor curler -- curl watch-auditor:8080/metrics
-```
