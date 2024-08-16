@@ -42,7 +42,7 @@ Quick Restart
 k3d cluster delete --all;
 docker system prune -a -f 
 k3d cluster create;
-docker buildx push -t watch-auditor:dev -f Dockerfile.arm .;
+docker build -t auditor:dev -f Dockerfile.arm .;
 k3d image import auditor:dev -c k3s-default  
 k apply -f k8s
 ```
