@@ -36,42 +36,28 @@ watch_controller_failures_total 10
 
 ## Developing
 
-Quick Restart
+Deploy Dev Environment:
 
 ```bash
-k3d cluster delete --all;
-docker system prune -a -f 
-k3d cluster create;
-docker build -t auditor:dev -f Dockerfile.arm .;
-k3d image import auditor:dev -c k3s-default  
-k apply -f k8s
+make deploy-dev
 ```
-
-build/push image:
+Check Dev Logs:
 
 ```bash
-make build-arm-image
-# or 
-make build-push-arm-image
+make check-logs
 ```
+
+Check Dev Metrics:
 
 ```bash
-make build-amd-image
-# or 
-make build-push-amd-image
+make check-metrics
 ```
 
+Clean up Dev Environment:
 
-## Check Logs and Metrics
 ```bash
-k logs -n watch-auditor -l app=watch-auditor -f
-
-kubectl run curler -n watch-auditor --image=nginx
-k exec -it -n watch-auditor curler -- curl watch-auditor:8080/metrics
+make clean-dev
 ```
-
-
-## Test
 
 unit tests:
 
@@ -83,4 +69,14 @@ integration tests:
 
 ```bash
 make e2e-test
+```
+
+
+
+## Check Logs and Metrics
+```bash
+k logs -n watch-auditor -l app=watch-auditor -f
+
+kubectl run curler -n watch-auditor --image=nginx
+k exec -it -n watch-auditor curler -- curl watch-auditor:8080/metrics
 ```

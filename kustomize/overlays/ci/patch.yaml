@@ -9,5 +9,5 @@ spec:
   template:
     spec:
       containers:
-      - image: watch-auditor:prod
+      - image: watch-auditor:ci
         name: watch-auditor 

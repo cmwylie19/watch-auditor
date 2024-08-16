@@ -21,3 +21,18 @@ unit-test:
 e2e-test:
 	ginkgo -v --tags='e2e' ./e2e
 
+deploy-dev:
+	kind create cluster
+	docker build -t watch-auditor:dev . -f Dockerfile.arm
+	kind load docker-image watch-auditor:dev
+	kubectl apply -k kustomize/overlays/dev
+
+clean-dev:
+	kind delete cluster --name kind
+	docker system prune -a -f
+
+check-metrics:
+	kubectl run -it curler -n watch-auditor --image=nginx:alpine --rm -it --restart=Never  -- curl -s http://watch-auditor.watch-auditor.svc.cluster.local:8080/metrics | grep watch_controller_failures_total
+
+check-logs:
+	kubectl logs -n watch-auditor -l app=watch-auditor -f | jq
