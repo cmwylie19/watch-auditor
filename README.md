@@ -6,7 +6,7 @@ The Watch Auditor is a tool that ensures that measures watch misses between Pepr
 - [Metrics](#metrics)
 - [Developing](#developing)
 
-**NOTE** Watch Auditor needs amd64 image for GitHub Actions.
+**NOTE** Watch Auditor needs amd64 image for GitHub Actions. use `make build-push-prod-image`
 
 ## Configurability:
 

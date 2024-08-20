@@ -1,10 +1,10 @@
 .DEFAULT_GOAL := docker-image
 
 IMAGE ?= cmwylie19/watch-auditor:v0.0.1
-PROD_IMAGE ?= watch-auditor:prod
+PROD_IMAGE ?= cmwylie19/watch-auditor:prod
 
-build-prod-image:
-	docker build -t $(PROD_IMAGE) -f Dockerfile.amd .
+build-push-prod-image:
+	docker buildx build --platform linux/amd64,linux/arm64 --push -t $(PROD_IMAGE) -f Dockerfile.amd .
 
 build-arm-image: 
 	docker build -t $(IMAGE) -f Dockerfile.arm .
